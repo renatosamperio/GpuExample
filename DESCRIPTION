@@ -1,0 +1,18 @@
+Package: GpuExample
+Title: Runs GPU CUDA example
+Version: 1.0
+Authors@R: 
+    person("Renato", "Samperio", , "renatosamperio@gmail.com", role = c("aut", "cre"))
+Description: Executes a portafolio simulation.
+License: GPL (>= 2)
+Imports:
+    Rcpp,
+    stats,
+    tictoc,
+    utils
+LinkingTo: 
+    Rcpp
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.2
+SystemRequirements: GNU make

@@ -1,0 +1,38 @@
+## R relted paths
+R_INC = /usr/share/R
+RCPP_INC = /usr/local/lib/R/site-library/Rcpp
+R_LOCAL = /usr/include
+R_INCLUDE_FLAGS = -I$(R_LOCAL) -I$(R_INC)/include -I$(RCPP_INC)/include 
+R_LIB_FLAGS = -L$(RCPP_INC)/libs
+
+## Cuda flags and files
+NVCC = $(CUDA_HOME)/bin/nvcc
+#GPU_ARCH = sm_70
+GPU_ARCH = sm_89
+CUDA_HOME = /usr/local/cuda
+CUDA_LIBRARIES = -lcurand -lcudart
+# Nvidia Docker
+CUDA_LIB_PATH=$(CUDA_HOME)/targets/sbsa-linux
+# Google Colab
+#CUDA_LIB_PATH=$(CUDA_HOME)/targets/x86_64-linux/lib
+CUDA_INC = -I$(CUDA_LIB_PATH)/include
+CUDA_LIB = -L$(CUDA_LIB_PATH)/lib
+CUDA_FLAGS = -O3 -arch=$(GPU_ARCH) -G -lR --shared -Xcompiler -fPIC $(CUDA_LIBRARIES)
+
+## C++ flags and files
+CXX=/usr/bin/g++ -std=c++17
+cu_sources := $(wildcard *cu)
+cu_sharedlibs := $(patsubst %.cu, %.o,$(cu_sources))
+cpp_sources := $(wildcard *.cpp)
+cpp_sharedlibs := $(patsubst %.cpp, %.o, $(cpp_sources))
+
+PKG_LIBS += -x cu $(CUDA_LIBRARIES) $(CUDA_LIB)
+OBJECTS = $(cu_sharedlibs)  $(cpp_sharedlibs)
+all : GpuExample.so
+GpuExample.so: $(OBJECTS)
+
+%.o: %.cpp $(cpp_sources)
+			$(CXX) $< -c -fPIC $(R_INCLUDE_FLAGS) $(R_LIB_FLAGS)  -I.
+            
+%.o: %.cu $(cu_sources)
+			$(NVCC) $(R_INCLUDE_FLAGS) $(R_LIB_FLAGS) $(CUDA_INC) $(CUDA_LIB) $(CUDA_FLAGS) $< -c -I.
