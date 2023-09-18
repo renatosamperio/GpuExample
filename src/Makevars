@@ -5,18 +5,24 @@ R_LOCAL = /usr/include
 R_INCLUDE_FLAGS = -I$(R_LOCAL) -I$(R_INC)/include -I$(RCPP_INC)/include 
 R_LIB_FLAGS = -L$(RCPP_INC)/libs
 
-## Cuda flags and files
-NVCC = $(CUDA_HOME)/bin/nvcc
-#GPU_ARCH = sm_70
-GPU_ARCH = sm_89
+## Defined compiler space
 CUDA_HOME = /usr/local/cuda
-CUDA_LIBRARIES = -lcurand -lcudart
-# Nvidia Docker
-CUDA_LIB_PATH=$(CUDA_HOME)/targets/sbsa-linux
-# Google Colab
-#CUDA_LIB_PATH=$(CUDA_HOME)/targets/x86_64-linux/lib
+NVCC = $(CUDA_HOME)/bin/nvcc
+
+## Defined specific compiler configuration
+## Nvidia Docker
+#GPU_ARCH = sm_89
+#CUDA_LIB_PATH=$(CUDA_HOME)/targets/sbsa-linux
+## Google Colab
+GPU_ARCH = sm_70
+CUDA_LIB_PATH=$(CUDA_HOME)/targets/x86_64-linux
+
+## Headers and libraries
 CUDA_INC = -I$(CUDA_LIB_PATH)/include
 CUDA_LIB = -L$(CUDA_LIB_PATH)/lib
+
+## Set CUDA libraries
+CUDA_LIBRARIES = -lcurand -lcudart
 CUDA_FLAGS = -O3 -arch=$(GPU_ARCH) -G -lR --shared -Xcompiler -fPIC $(CUDA_LIBRARIES)
 
 ## C++ flags and files

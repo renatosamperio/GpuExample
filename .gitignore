@@ -1,0 +1,13 @@
+inst/doc
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+..Rcheck
+src/*.o
+src/*.so
+src/*.dll
+logs/*
+inst/*
+/doc/
+/Meta/
