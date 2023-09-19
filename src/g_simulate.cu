@@ -20,6 +20,7 @@ int g_simulate(Rcpp::NumericMatrix portfolio,  int n_factor, int n_sim ) {
     
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
+
     // Initialising device memory pointers
     double *dCounterparty = NULL;
     double *dCountry      = NULL;
@@ -27,9 +28,10 @@ int g_simulate(Rcpp::NumericMatrix portfolio,  int n_factor, int n_sim ) {
     double *dExposure     = NULL;
     double *dPdth         = NULL;
     double *dLosses       = NULL;
-
+  
     int numRows = portfolio.nrow();
     int numCols = portfolio.ncol();
+    size_t hSize = numRows * sizeof(double);
     Rcpp::Rcout << "Matrix size ("<< numRows<<", "<<numCols<<"): " 
                 << n_factor << " : " << n_sim
                 << std::endl;
@@ -54,6 +56,9 @@ int g_simulate(Rcpp::NumericMatrix portfolio,  int n_factor, int n_sim ) {
     double* pIndustry = vIndustry.data();
     double* pExposure = vExposure.data();
     double* pPdth = vPdth.data();
+
+    // Allocating host memory
+    double* hLosses = (double *)malloc(hSize);
 
     // Copy input data from host to device
     err = cudaMalloc((void **)&dCounterparty, numRows);
@@ -87,5 +92,12 @@ int g_simulate(Rcpp::NumericMatrix portfolio,  int n_factor, int n_sim ) {
                 cudaGetErrorString(err));
         exit(EXIT_FAILURE);
     }
+
+
+    err = cudaMemcpy(hLosses, dLosses, hSize, cudaMemcpyDeviceToHost);
+    for (int i=0; i<5; i++) {
+        Rcpp::Rcout << "  hLosses["<< i <<"] = "<<hLosses[i]<<"): " << std::endl;
+    }
+    free(hLosses);
     return 1;
 }

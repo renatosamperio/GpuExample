@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <cuda.h>
 
+#include <cuda_runtime.h>
+
 //' Runs GPU-based simulator
 //' 
 //' @param portfolio `matrix` porfolio
