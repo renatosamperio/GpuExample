@@ -10,13 +10,6 @@ const float w_counterparty = sqrt(.65); // counterparty loading
 const float w_country = sqrt(.1);  // country loading
 const float w_industry = sqrt(.1); // industry loading
 
-unsigned int rand_xorshift(unsigned int rng_state) {
-    rng_state ^= (rng_state << 13);
-    rng_state ^= (rng_state >> 17);
-    rng_state ^= (rng_state << 5);
-    return rng_state;
-}
-
 __global__ void g_simulate(const double *dCounterparty, 
                           const double *dCountry, 
                           const double *dIndustry, 
@@ -29,24 +22,6 @@ __global__ void g_simulate(const double *dCounterparty,
     if (i < numRows) {
         dLosses[i] = dCounterparty[i] + dCountry[i] + dIndustry[i] + dExposure[i] + dPdth[i] ;
     }
-
-   device float* factors = &factors_buffer[index * n_factor];
-   
-   uint seed_thread = seed[index];
-   
-   for (int i_sim=0; i_sim<n_sim_per_thread; i_sim++) {
-      get_normal_variates(seed_thread, factors, n_factor);
-      float loss=0;
-      for (int i=0; i<n_row; i++) {
-         float r_tot = w_global * factors[0] + w_counterparty * factors[counterparty[i]] +
-                       w_country * factors[country[i]] + w_industry * factors[industry[i]];
-         if (r_tot < pd_th[i]) {
-            loss += exposure[i];
-         }
-      }
-      result[index*n_sim_per_thread+i_sim] = loss;
-   }
-   
    
 }
 
@@ -114,7 +89,7 @@ int g_simulate(Rcpp::NumericMatrix portfolio,  int n_factor, int n_sim ) {
     int blocksPerGrid = (numRows + threadsPerBlock - 1) / threadsPerBlock;
 
     // Launch the Vector Add CUDA Kernel
-    randomize<<<blocksPerGrid, threadsPerBlock>>>(dCounterparty, 
+    g_simulate<<<blocksPerGrid, threadsPerBlock>>>(dCounterparty, 
                                                   dCountry,
                                                   dIndustry,
                                                   dExposure,

@@ -13,10 +13,8 @@ __global__ void xorshift_kernel(unsigned int seed, unsigned int* output, int N) 
     }
 }
 
-int xorshift_generator(Rcpp::NumericVector numbers, int N) {
+Rcpp::NumericVector xorshift_generator(Rcpp::NumericVector numbers, int N) {
    
-    std::vector<double> numbers_as_std_vector = Rcpp::as<std::vector<double> >(numbers); 
-
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
 
@@ -46,17 +44,14 @@ int xorshift_generator(Rcpp::NumericVector numbers, int N) {
     // Copy the random numbers from device to host
     err = cudaMemcpy(h_output, d_output, sizeof(unsigned int) * numThreads * numBlocks * N, cudaMemcpyDeviceToHost);
 
-    // Print the generated random numbers (for demonstration purposes)
-    for (int i = 0; i < numThreads * numBlocks * N; i++) {
-        std::cout << h_output[i] << " ";
-        if ((i + 1) % 10 == 0) {
-            std::cout << std::endl;
-        }
-    }
+    // Passing data from array into an vector
+    int n = sizeof(h_output) / sizeof(h_output[0]);
+    std::vector<int> numbers_as_std_vector(N);
+    memcpy(&numbers_as_std_vector[0], &h_output[0], N*sizeof(int));
 
     // Clean up
     delete[] h_output;
     cudaFree(d_output);
 
-    return 0;
+    return Rcpp::NumericVector(numbers_as_std_vector.begin(), numbers_as_std_vector.end());
 }

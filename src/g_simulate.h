@@ -6,8 +6,6 @@
 
 #include <cuda_runtime.h>
 
-unsigned int rand_xorshift(unsigned int rng_state);
-
 //' Runs GPU-based simulator
 //' 
 //' @param portfolio `matrix` porfolio
