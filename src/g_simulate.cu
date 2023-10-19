@@ -17,7 +17,7 @@ unsigned int rand_xorshift(unsigned int rng_state) {
     return rng_state;
 }
 
-__global__ void randomize(const double *dCounterparty, 
+__global__ void g_simulate(const double *dCounterparty, 
                           const double *dCountry, 
                           const double *dIndustry, 
                           const double *dExposure, 
