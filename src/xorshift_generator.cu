@@ -29,7 +29,7 @@ void get_random_numbers(unsigned int* host_random_numbers, int N) {
     int num_threads = 256;  // Number of threads in each block
     int num_blocks = 4;     // Number of blocks
     int num_elements = ceil( N / (num_threads * num_blocks));
-    printf("Processing max elements per thread: %d", num_elements)
+    Rcpp::Rcout << "Processing max elements per thread" << num_elements <<"\n";
 
     size_t random_size = N * sizeof(unsigned int);
     unsigned int* device_random_numbers;
@@ -46,7 +46,7 @@ void get_random_numbers(unsigned int* host_random_numbers, int N) {
 
     // Print a few random numbers from the first thread
     for (int i = 0; i < 10; i++) {
-      printf("Array number[%d] = %u \n", i, host_random_numbers[i]);
+      Rcpp::Rcout << "Array ["<< i<< "]: " << host_random_numbers[i] << "\n";
     }
 
 }
@@ -54,6 +54,7 @@ void get_random_numbers(unsigned int* host_random_numbers, int N) {
 
 Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N) {
    
+    Rcpp::Rcout << "Calculating "<< N << " random numbers" <<"\n";
     // Create array for random numbers
     unsigned int* host_random_numbers = new unsigned int[N];
 
@@ -67,7 +68,7 @@ Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N) {
 
     // Print a few random numbers from the first thread
     for (int i = 0; i < 10; i++) {
-      printf("Vector number[%d] = %u \n", i, numbers_as_std_vector[i]);
+      Rcpp::Rcout << "Vector ["<< i<< "]: " << numbers_as_std_vector[i] << "\n";
     }
 
     // Clean up

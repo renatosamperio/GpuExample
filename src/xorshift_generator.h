@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <curand_kernel.h>
+#include <cmath>
 
 // Xorshift parameters (you may customize these)
 #define XORSHIFT_SEED 123456789
