@@ -1,36 +1,42 @@
 #include "xorshift_generator.h"
 
 // CUDA kernel to generate random numbers using Xorshift
-__global__ void xorshiftRandomKernel(unsigned int* random_numbers, int num_elements) {
+__global__ void xorshiftRandomKernel(unsigned int* random_numbers, int num_elements, int N) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int x = XORSHIFT_SEED + tid; // Seed initialization, unique for each thread
     
     for (int i = 0; i < num_elements; i++) {
-        x ^= (x << XORSHIFT_A);
-        x ^= (x >> XORSHIFT_B);
-        x ^= (x << XORSHIFT_C);
-        random_numbers[tid * num_elements + i] = x;
+        int idx = tid * num_elements + i;
+        if (idx < N) {
+            x ^= (x << XORSHIFT_A);
+            x ^= (x >> XORSHIFT_B);
+            x ^= (x << XORSHIFT_C);
+            random_numbers[tid * num_elements + i] = x;
+        }
+        else break;
     }
 }
 
-void get_random_numbers(unsigned int* host_random_numbers) {
+void get_random_numbers(unsigned int* host_random_numbers, int N) {
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
 
-    int num_elements = 1000; // Number of random numbers to generate per thread
-    int num_threads = 128;  // Number of threads in each block
-    int num_blocks = 4;    // Number of blocks
+    // int num_elements = 1000; // Number of random numbers to generate per thread
 
-    int total_elements = num_threads * num_blocks * num_elements;
-    size_t random_size = total_elements * sizeof(unsigned int);
-    
-    // unsigned int* host_random_numbers = new unsigned int[total_elements];
+    // Maximum number of threads per block: 1024
+    // Max dimension size of a thread block (x,y,z): (1024, 1024, 64)
+    // This two numbers should fit in 1024
+    int num_threads = 256;  // Number of threads in each block
+    int num_blocks = 4;     // Number of blocks
+    int num_elements = ceil( N / (num_threads * num_blocks));
+    printf("Processing max elements per thread: %d", num_elements)
+
+    size_t random_size = N * sizeof(unsigned int);
     unsigned int* device_random_numbers;
-
     err = cudaMalloc((void**)&device_random_numbers, random_size);
 
     // Launch the kernel
-    xorshiftRandomKernel<<<num_blocks, num_threads>>>(device_random_numbers, num_elements);
+    xorshiftRandomKernel<<<num_blocks, num_threads>>>(device_random_numbers, num_elements, N);
     
     // Copy the results back to the host
     err = cudaMemcpy(host_random_numbers, device_random_numbers, random_size, cudaMemcpyDeviceToHost);
@@ -40,11 +46,8 @@ void get_random_numbers(unsigned int* host_random_numbers) {
 
     // Print a few random numbers from the first thread
     for (int i = 0; i < 10; i++) {
-        // std::cout << "Array Number " << i << ": " << host_random_numbers[i] << std::endl;
       printf("Array number[%d] = %u \n", i, host_random_numbers[i]);
     }
-
-    // delete[] host_random_numbers;
 
 }
 
@@ -55,7 +58,7 @@ Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N) {
     unsigned int* host_random_numbers = new unsigned int[N];
 
     // Generate random numbers
-    get_random_numbers(host_random_numbers);
+    get_random_numbers(host_random_numbers, N);
 
     // Passing data from array into an vector
     std::vector<unsigned int> numbers_as_std_vector(N);
@@ -65,7 +68,6 @@ Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N) {
     // Print a few random numbers from the first thread
     for (int i = 0; i < 10; i++) {
       printf("Vector number[%d] = %u \n", i, numbers_as_std_vector[i]);
-        // std::cout << "Vector Number " << i << ": " << numbers_as_std_vector[i] << std::endl;
     }
 
     // Clean up

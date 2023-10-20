@@ -10,7 +10,7 @@
 #define XORSHIFT_C 5
 
 // Wrapper to calculate random numbers
-void get_random_numbers(unsigned int* host_random_numbers);
+void get_random_numbers(unsigned int* host_random_numbers, int N);
 
 //' Runs GPU-based simulator
 //' 
