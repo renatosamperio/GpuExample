@@ -1,5 +1,6 @@
 #' Runs a portfolio simulation from a GPU
 #' 
+#' @param N `numeric` sample size
 #' 
 simulate_xorshift <- function(N = 1000000) {
     
@@ -10,7 +11,9 @@ simulate_xorshift <- function(N = 1000000) {
     system.time(res <- xorshift_generator(numbers, N))
 
     list(mean = mean(res),
-    std = sd(res),
-    length = length(res))
+    stdev = sd(res),
+    length = length(res),
+    out = res)
+    
 }
 

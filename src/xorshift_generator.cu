@@ -1,57 +1,76 @@
 #include "xorshift_generator.h"
 
-// Xorshift random number generator kernel
-__global__ void xorshift_kernel(unsigned int seed, unsigned int* output, int N) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    unsigned int x = seed + idx; // Use unique seed for each thread
-
-    for (int i = 0; i < N; i++) {
-        x ^= x << 13;
-        x ^= x >> 17;
-        x ^= x << 5;
-        output[idx * N + i] = x;
+// CUDA kernel to generate random numbers using Xorshift
+__global__ void xorshiftRandomKernel(unsigned int* random_numbers, int num_elements) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    unsigned int x = XORSHIFT_SEED + tid; // Seed initialization, unique for each thread
+    
+    for (int i = 0; i < num_elements; i++) {
+        x ^= (x << XORSHIFT_A);
+        x ^= (x >> XORSHIFT_B);
+        x ^= (x << XORSHIFT_C);
+        random_numbers[tid * num_elements + i] = x;
     }
 }
 
-Rcpp::NumericVector xorshift_generator(Rcpp::NumericVector numbers, int N) {
-   
+void get_random_numbers(unsigned int* host_random_numbers) {
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
 
-    // const int N = 100; // Number of random numbers to generate per thread
-    const int numThreads = 256; // Number of CUDA threads per block
-    const int numBlocks = 4;   // Number of CUDA blocks
-    size_t hSize = N * sizeof(double); // size of output vector
+    int num_elements = 1000; // Number of random numbers to generate per thread
+    int num_threads = 128;  // Number of threads in each block
+    int num_blocks = 4;    // Number of blocks
 
-    // Allocating host memory
-    double* h_numbers = (double *)malloc(hSize);
-    unsigned int* d_output; // Device buffer for random numbers
-    unsigned int* h_output = new unsigned int[numThreads * numBlocks * N]; // Host buffer for random numbers
+    int total_elements = num_threads * num_blocks * num_elements;
+    size_t random_size = total_elements * sizeof(unsigned int);
+    
+    // unsigned int* host_random_numbers = new unsigned int[total_elements];
+    unsigned int* device_random_numbers;
 
-    // Allocate memory on the GPU
-    cudaMalloc((void**)&d_output, sizeof(unsigned int) * numThreads * numBlocks * N);
+    err = cudaMalloc((void**)&device_random_numbers, random_size);
 
-    // Launch the Xorshift kernel
-    xorshift_kernel<<<numBlocks, numThreads>>>(12345, d_output, N);
+    // Launch the kernel
+    xorshiftRandomKernel<<<num_blocks, num_threads>>>(device_random_numbers, num_elements);
+    
+    // Copy the results back to the host
+    err = cudaMemcpy(host_random_numbers, device_random_numbers, random_size, cudaMemcpyDeviceToHost);
 
-    err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n",
-                cudaGetErrorString(err));
-        exit(EXIT_FAILURE);
+    // Cleanup
+    err = cudaFree(device_random_numbers);
+
+    // Print a few random numbers from the first thread
+    for (int i = 0; i < 10; i++) {
+        // std::cout << "Array Number " << i << ": " << host_random_numbers[i] << std::endl;
+      printf("Array number[%d] = %u \n", i, host_random_numbers[i]);
     }
 
-    // Copy the random numbers from device to host
-    err = cudaMemcpy(h_output, d_output, sizeof(unsigned int) * numThreads * numBlocks * N, cudaMemcpyDeviceToHost);
+    // delete[] host_random_numbers;
+
+}
+
+
+Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N) {
+   
+    // Create array for random numbers
+    unsigned int* host_random_numbers = new unsigned int[N];
+
+    // Generate random numbers
+    get_random_numbers(host_random_numbers);
 
     // Passing data from array into an vector
-    int n = sizeof(h_output) / sizeof(h_output[0]);
-    std::vector<int> numbers_as_std_vector(N);
-    memcpy(&numbers_as_std_vector[0], &h_output[0], N*sizeof(int));
+    std::vector<unsigned int> numbers_as_std_vector(N);
+    memcpy(&numbers_as_std_vector[0], 
+            &host_random_numbers[0], N*sizeof(unsigned int));
+
+    // Print a few random numbers from the first thread
+    for (int i = 0; i < 10; i++) {
+      printf("Vector number[%d] = %u \n", i, numbers_as_std_vector[i]);
+        // std::cout << "Vector Number " << i << ": " << numbers_as_std_vector[i] << std::endl;
+    }
 
     // Clean up
-    delete[] h_output;
-    cudaFree(d_output);
+    delete[] host_random_numbers;
 
-    return Rcpp::NumericVector(numbers_as_std_vector.begin(), numbers_as_std_vector.end());
+    return Rcpp::IntegerVector(numbers_as_std_vector.begin(), 
+                                numbers_as_std_vector.end());
 }
