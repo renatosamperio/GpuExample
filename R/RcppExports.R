@@ -28,6 +28,16 @@ sim <- function(portfolio, n_factor, n_sim) {
 
 #' Runs GPU-based simulator
 #' 
+#' @param portfolio `matrix` porfolio
+#' @param n_factor `integer` number of factors
+#' @param n_sim `integer` number of simulations
+#' @export
+simulator <- function(portfolio, n_factor, n_sim) {
+    .Call(`_GpuExample_simulator`, portfolio, n_factor, n_sim)
+}
+
+#' Runs GPU-based simulator
+#' 
 #' @param numbers `vector` input vector
 #' @param N `integer` number of samples
 #' @export

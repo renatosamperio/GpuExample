@@ -45,6 +45,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// simulator
+Rcpp::NumericVector simulator(Rcpp::NumericMatrix portfolio, int n_factor, int n_sim);
+RcppExport SEXP _GpuExample_simulator(SEXP portfolioSEXP, SEXP n_factorSEXP, SEXP n_simSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type portfolio(portfolioSEXP);
+    Rcpp::traits::input_parameter< int >::type n_factor(n_factorSEXP);
+    Rcpp::traits::input_parameter< int >::type n_sim(n_simSEXP);
+    rcpp_result_gen = Rcpp::wrap(simulator(portfolio, n_factor, n_sim));
+    return rcpp_result_gen;
+END_RCPP
+}
 // xorshift_generator
 Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N);
 RcppExport SEXP _GpuExample_xorshift_generator(SEXP numbersSEXP, SEXP NSEXP) {
@@ -62,6 +75,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_GpuExample_g_simulate", (DL_FUNC) &_GpuExample_g_simulate, 3},
     {"_GpuExample_rand_num", (DL_FUNC) &_GpuExample_rand_num, 0},
     {"_GpuExample_sim", (DL_FUNC) &_GpuExample_sim, 3},
+    {"_GpuExample_simulator", (DL_FUNC) &_GpuExample_simulator, 3},
     {"_GpuExample_xorshift_generator", (DL_FUNC) &_GpuExample_xorshift_generator, 2},
     {NULL, NULL, 0}
 };

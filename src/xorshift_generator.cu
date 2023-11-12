@@ -33,7 +33,7 @@ void get_random_numbers(unsigned int* host_random_numbers, int N) {
 
     size_t random_size = N * sizeof(unsigned int);
     unsigned int* device_random_numbers;
-    err = cudaMalloc((void**)&device_random_numbers, random_size);
+    cudaError_t err = cudaMalloc((void**)&device_random_numbers, random_size);
 
     // Launch the kernel
     xorshiftRandomKernel<<<num_blocks, num_threads>>>(device_random_numbers, num_elements, N);

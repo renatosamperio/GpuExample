@@ -12,7 +12,9 @@ simulate_gpu <- function() {
     n_sim <- 256e3
 
     # simulation engine (C++ code)
-    system.time(losses <- g_simulate(portfolio, n_factor, n_sim))
+    system.time(
+        losses <- simulator(portfolio, n_factor, n_sim)
+    )
 
     mean(losses)
     mean(losses[losses > stats::quantile(losses, .99)])
