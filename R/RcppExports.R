@@ -26,3 +26,12 @@ sim <- function(portfolio, n_factor, n_sim) {
     .Call(`_GpuExample_sim`, portfolio, n_factor, n_sim)
 }
 
+#' Runs GPU-based simulator
+#' 
+#' @param numbers `vector` input vector
+#' @param N `integer` number of samples
+#' @export
+xorshift_generator <- function(numbers, N) {
+    .Call(`_GpuExample_xorshift_generator`, numbers, N)
+}
+

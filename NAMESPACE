@@ -2,6 +2,7 @@
 
 export(g_simulate)
 export(rand_num)
+export(xorshift_generator)
 exportPattern("^[[:alpha:]]+")
 importFrom(Rcpp,evalCpp)
 useDynLib(GpuExample, .registration=TRUE)

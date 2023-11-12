@@ -11,7 +11,7 @@ __global__ void xorshiftRandomKernel(unsigned int* random_numbers, int num_eleme
             x ^= (x << XORSHIFT_A);
             x ^= (x >> XORSHIFT_B);
             x ^= (x << XORSHIFT_C);
-            random_numbers[tid * num_elements + i] = x;
+            random_numbers[tid * num_elements + i] = static_cast<int>(x);
         }
         else break;
     }
@@ -19,7 +19,7 @@ __global__ void xorshiftRandomKernel(unsigned int* random_numbers, int num_eleme
 
 void get_random_numbers(unsigned int* host_random_numbers, int N) {
     // Error code to check return values for CUDA calls
-    cudaError_t err = cudaSuccess;
+    // cudaError_t err = cudaSuccess;
 
     // int num_elements = 1000; // Number of random numbers to generate per thread
 

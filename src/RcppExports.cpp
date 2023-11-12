@@ -45,11 +45,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// xorshift_generator
+Rcpp::IntegerVector xorshift_generator(Rcpp::IntegerVector numbers, int N);
+RcppExport SEXP _GpuExample_xorshift_generator(SEXP numbersSEXP, SEXP NSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type numbers(numbersSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    rcpp_result_gen = Rcpp::wrap(xorshift_generator(numbers, N));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_GpuExample_g_simulate", (DL_FUNC) &_GpuExample_g_simulate, 3},
     {"_GpuExample_rand_num", (DL_FUNC) &_GpuExample_rand_num, 0},
     {"_GpuExample_sim", (DL_FUNC) &_GpuExample_sim, 3},
+    {"_GpuExample_xorshift_generator", (DL_FUNC) &_GpuExample_xorshift_generator, 2},
     {NULL, NULL, 0}
 };
 
