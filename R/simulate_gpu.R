@@ -16,11 +16,15 @@ simulate_gpu <- function() {
         losses <- simulator(portfolio, n_factor, n_sim)
     )
 
-    mean(losses)
-    mean(losses[losses > stats::quantile(losses, .99)])
+    lossess_avg <- mean(losses)
+    lossess_tail_avg <- mean(losses[losses > stats::quantile(losses, .99)])
+
+    message("Loss mean = ", lossess_avg)
+    message("ES99 = ", lossess_tail_avg)
 
     # calculate exact mean
-    sum(stats::pnorm(portfolio[, 5]) * portfolio[, 4])
+    lossess_truth <- sum(stats::pnorm(portfolio[, 5]) * portfolio[, 4])
+    message("Loss truth = ", lossess_truth)
 
     tictoc::toc()
 }

@@ -168,7 +168,7 @@ Rcpp::NumericVector simulator(
    // confirm kernel returned results
    err = cudaGetLastError();
    if (err != cudaSuccess) {
-      fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n",
+      fprintf(stderr, "Failed to launch simulate kernel (error code %s)!\n",
                cudaGetErrorString(err));
       exit(EXIT_FAILURE);
    }
@@ -187,6 +187,6 @@ Rcpp::NumericVector simulator(
    cudaFree(dExposure);
    cudaFree(dPdth);
    free(hresults);
-   
+
    return r_result;
 }
