@@ -1,8 +1,8 @@
 ## R relted paths
-# R_INC = /usr/share/R
-# R_SRC = /usr/local/lib/R/site-library
-R_INC = /opt/R/4.3.2/lib/R
-R_LIBS = ${R_INC}/library
+R_INC = /usr/share/R
+R_LIBS = /usr/local/lib/R/site-library
+# R_INC = /opt/R/4.3.2/lib/R
+# R_LIBS = ${R_INC}/library
 RCPP_INC = ${R_LIBS}/Rcpp
 R_LOCAL = /usr/include
 R_INCLUDE_FLAGS = -I$(R_LOCAL) -I$(R_INC)/include -I$(RCPP_INC)/include 
